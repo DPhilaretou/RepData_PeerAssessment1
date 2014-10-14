@@ -1,13 +1,9 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-```{r LoadData, echo = TRUE}
+
+```r
 # Extract activity.csv into repository folder
 # Set working directory to the Repository 
 setwd("~/GitHub/RepData_PeerAssessment1")
@@ -19,7 +15,8 @@ No_NA_Data <- na.omit(ActivityData)
 ## What is the mean total number of steps taken per day?
 
 ### 1. Histogram of the total number of steps taken each day
-```{r Histogram, echo=TRUE}
+
+```r
 # Summing steps by day
 Total_by_day<-aggregate(steps ~ date,No_NA_Data,sum)
 
@@ -29,26 +26,40 @@ hist(Total_by_day$steps, col = "green",
      ylim=c(0,30) )
 ```
 
+![plot of chunk Histogram](./PA1_template_files/figure-html/Histogram.png) 
+
 ### 2. Calculate and report the mean and median total number of steps taken per day
 
-```{r MeanByDay, echo = TRUE}
+
+```r
 # Get mean of total steps per day
 Mean_Total_by_day <- mean(Total_by_day$steps)
 Mean_Total_by_day
+```
 
+```
+## [1] 10766
+```
+
+```r
 # Get median of total steps per day
 Median_Total_by_day <- median(Total_by_day$steps)
 Median_Total_by_day
 ```
 
-- The Mean Total number of steps per day is `r round(Mean_Total_by_day,0)`.
-- The Median Total number of steps taken per day is `r Median_Total_by_day`.
+```
+## [1] 10765
+```
+
+- The Mean Total number of steps per day is 1.0766 &times; 10<sup>4</sup>.
+- The Median Total number of steps taken per day is 10765.
 
 ## What is the average daily activity pattern?
 
 ### 1. A time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r MeanByInterval, echo = TRUE}
+
+```r
 # sum steps by interval to get average number of steps in an interval across all days
 Mean_Interval_Steps <- aggregate(steps ~ interval, No_NA_Data, mean)
 
@@ -63,9 +74,12 @@ axis(2, at = yticks, labels = yticks)
 axis(1, at = xticks, labels = xticks)
 ```
 
+![plot of chunk MeanByInterval](./PA1_template_files/figure-html/MeanByInterval.png) 
+
 ### 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r MaxInterval, echo = TRUE}
+
+```r
 # find the maximum average number of steps in an interval
 Max_steps <- max(Mean_Interval_Steps$steps)
 
@@ -73,21 +87,31 @@ Max_steps <- max(Mean_Interval_Steps$steps)
 Interval_Max_Steps <- subset(Mean_Interval_Steps, steps== Max_steps)
 Interval_Max_Steps
 ```
-Interval `r Interval_Max_Steps$interval` has the maximum average number of steps, `r round(Max_steps,1)`
+
+```
+##     interval steps
+## 104      835 206.2
+```
+Interval 835 has the maximum average number of steps, 206.2
 
 ## Imputing missing values
 ### Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
 
 ### 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r NAs, echo = TRUE}
+
+```r
 # Create a dataset of rows with NA's
 ActivityData_NAs <- ActivityData[!complete.cases(ActivityData),]
 
 # number of rows
 nrow(ActivityData_NAs)
 ```
-The Total number of rows with NAs is `r nrow(ActivityData_NAs)`.
+
+```
+## [1] 2304
+```
+The Total number of rows with NAs is 2304.
 
 ###2. Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
@@ -98,9 +122,21 @@ It is then possible to use a case statement to create a new 'steps' column from 
 
 ###3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r ReplaceNAs, echo = TRUE}
+
+```r
 ## Using the mean for each 5-minute interval across all day, dataset: Mean_Interval_Steps
 library(sqldf)
+```
+
+```
+## Loading required package: gsubfn
+## Loading required package: proto
+## Loading required package: RSQLite
+## Loading required package: DBI
+## Loading required package: RSQLite.extfuns
+```
+
+```r
 options(sqldf.driver = "SQLite")
 
 UpdatedActivityData <- sqldf("select a.interval, a.date, 
@@ -109,9 +145,14 @@ UpdatedActivityData <- sqldf("select a.interval, a.date,
                              from ActivityData a join Mean_Interval_Steps b using (interval)")
 ```
 
+```
+## Loading required package: tcltk
+```
+
 ### 4a. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
 
-```{r Total_by_day_imputed, echo = TRUE}
+
+```r
 # aggregate steps by per date to get total number of steps in a day
 Total_by_day_imputed <- aggregate(steps ~ date, UpdatedActivityData, sum)
 
@@ -121,32 +162,45 @@ hist(Total_by_day_imputed$steps, col = "green",
      xlab="Total number of Steps per Day")
 ```
 
+![plot of chunk Total_by_day_imputed](./PA1_template_files/figure-html/Total_by_day_imputed.png) 
+
 ### Calculate and report the mean and median total number of steps taken per day
 
-```{r ImputedMeanByDay, echo = TRUE}
+
+```r
 # Get mean of total steps per day
 Mean_Total_by_day_imputed <- mean(Total_by_day_imputed$steps)
 Mean_Total_by_day_imputed
+```
 
+```
+## [1] 10766
+```
+
+```r
 # Get median of total steps per day
 Median_Total_by_day_imputed <- median(Total_by_day_imputed$steps)
 Median_Total_by_day_imputed
 ```
-- The Mean Total number of steps per day is `r round(Mean_Total_by_day_imputed,0)`.
-- The Median Total number of steps taken per day is `r round(Median_Total_by_day_imputed,0)`.
+
+```
+## [1] 10766
+```
+- The Mean Total number of steps per day is 1.0766 &times; 10<sup>4</sup>.
+- The Median Total number of steps taken per day is 1.0766 &times; 10<sup>4</sup>.
 
 ### 4b. Do these values differ from the estimates from the first part of the assignment?
 Data with the NA's removed:
 
-- The Mean Total number of steps per day is `r round(Mean_Total_by_day,0)`.
+- The Mean Total number of steps per day is 1.0766 &times; 10<sup>4</sup>.
 
-- The Median Total number of steps taken per day is `r Median_Total_by_day`.
+- The Median Total number of steps taken per day is 10765.
 
 Data with the NA's replaced by the mean per interval:
 
-- The Mean Total number of steps per day is `r round(Mean_Total_by_day_imputed,0)`.
+- The Mean Total number of steps per day is 1.0766 &times; 10<sup>4</sup>.
 
-- The Median Total number of steps taken per day is `r round(Median_Total_by_day_imputed,0)`.
+- The Median Total number of steps taken per day is 1.0766 &times; 10<sup>4</sup>.
 
 ### 4c. What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
@@ -158,8 +212,8 @@ Comparing the imputed dataset with the one with the NA's removed, the mean value
 
 ### 1. Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r Weekdays_weekends, echo = TRUE }
 
+```r
 # Using SQL to create the new dataset:
 # Add a column, type_day, which will have 'weekday' or 'weekend'
 # get the mean (average) of the steps by interval and type_day to get average number of steps in an interval across all days
@@ -171,20 +225,21 @@ IntervalStepsByDayType <- sqldf("select a.interval,
                                 from UpdatedActivityData a 
                                 group by a.interval, 
                                 type_day") 
-
 ```
 
 
 ### 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). An example was provided.
 
-```{r plot,echo = TRUE}
-  
+
+```r
 # Create a panel plot for weekdays and weekends
 library(ggplot2)
 
 qplot(interval, steps, data=IntervalStepsByDayType, geom = c("line"), xlab = "Intervals", 
       ylab="Number of steps", main="") + facet_wrap(~ type_day, ncol=1)
 ```
+
+![plot of chunk plot](./PA1_template_files/figure-html/plot.png) 
 
 In conclusion there are differences between week days and weekends: 
 
